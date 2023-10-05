@@ -1,15 +1,19 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
 class Item {
     private String title;
     private int year;
+    private double rating;
 
-    public Item(String title, int year) {
+    public Item(String title, int year, double rating) {
         this.title = title;
         this.year = year;
+        this.rating = rating;
     }
 
+    // Getters and Setters
     public String getTitle() {
         return title;
     }
@@ -18,87 +22,82 @@ class Item {
         return year;
     }
 
+    public double getRating() {
+        return rating;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
     public String getDescription() {
-        return "Title: " + title + "\nYear: " + year;
+        return "Title: " + title + "\nYear: " + year + "\nRating: " + rating;
     }
 }
 
-class Collection {
-    private int count;
-    private Item[] items;
+class CollectionManager {
+    private ArrayList<Item> items;
 
-    public Collection() {
-        this.count = 0;
-        this.items = new Item[10]; // Initial capacity of 10, you can adjust it as needed
+    public CollectionManager() {
+        items = new ArrayList<>();
     }
 
-    public void add(Item newItem) {
-        if (count == items.length) {
-            items = Arrays.copyOf(items, items.length * 2);
-        }
-        items[count] = newItem;
-        count++;
+    public void add(Item item) {
+        items.add(item);
     }
 
     public void remove(int index) {
-        if (index >= 0 && index < count) {
-            for (int i = index; i < count - 1; i++) {
-                items[i] = items[i + 1];
-            }
-            count--;
+        if (index >= 0 && index < items.size()) {
+            items.remove(index);
         } else {
             System.out.println("Invalid index.");
         }
     }
 
     public void printOne(int index) {
-        if (index >= 0 && index < count) {
-            System.out.println(items[index].getDescription());
+        if (index >= 0 && index < items.size()) {
+            System.out.println(items.get(index).getDescription());
         } else {
             System.out.println("Invalid index.");
         }
     }
 
     public void printAll() {
-        for (int i = 0; i < count; i++) {
-            System.out.println("Item " + (i + 1) + ":");
-            System.out.println(items[i].getDescription());
+        for (Item item : items) {
+            System.out.println(item.getDescription() + "\n");
         }
     }
 
     public void printList() {
-        for (int i = 0; i < count; i++) {
-            System.out.println((i + 1) + " - " + items[i].getTitle());
+        for (int i = 0; i < items.size(); i++) {
+            System.out.println((i + 1) + " - " + items.get(i).getTitle());
         }
     }
 
     public void sort() {
-        // Bubble sort based on the numeric property (year) of the items
-        for (int i = 0; i < count - 1; i++) {
-            for (int j = 0; j < count - i - 1; j++) {
-                if (items[j].getYear() > items[j + 1].getYear()) {
-                    Item temp = items[j];
-                    items[j] = items[j + 1];
-                    items[j + 1] = temp;
-                }
-            }
-        }
+        items.sort((item1, item2) -> Integer.compare(item1.getYear(), item2.getYear()));
     }
 
     public void search(String phrase) {
-        for (int i = 0; i < count; i++) {
-            if (items[i].getTitle().equalsIgnoreCase(phrase)) {
-                System.out.println("Item " + (i + 1) + ":");
-                System.out.println(items[i].getDescription());
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).getTitle().contains(phrase)) {
+                System.out.println(i + " - " + items.get(i).getDescription());
             }
         }
     }
 
     public void searchByYear(int year) {
-        for (int i = 0; i < count; i++) {
-            if (items[i].getYear() == year) {
-                System.out.println("Item " + (i + 1) + ":");
-                System.out.println(items[i].getDescription());
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).getYear() == year) {
+                System.out.println(i + " - " + items.get(i).getDescription());
             }
         }
     }
@@ -106,20 +105,19 @@ class Collection {
 
 public class Main {
     public static void main(String[] args) {
+        CollectionManager collectionManager = new CollectionManager();
         Scanner scanner = new Scanner(System.in);
-        Collection collection = new Collection();
 
         System.out.println("Welcome to the hobby object database!");
-
         while (true) {
             System.out.println("Choose an option to proceed:");
-            System.out.println("1 - Add new item");
-            System.out.println("2 - Print all items");
-            System.out.println("3 - Print detailed information about an item");
-            System.out.println("4 - Remove an item");
-            System.out.println("5 - Sort items by year");
-            System.out.println("6 - Search items by title");
-            System.out.println("7 - Search items by year");
+            System.out.println("1 - Print item list");
+            System.out.println("2 - Add a new item");
+            System.out.println("3 - Remove an item");
+            System.out.println("4 - Sort items by year");
+            System.out.println("5 - Search items by title");
+            System.out.println("6 - Search items by year");
+            System.out.println("7 - Print detailed item list");
             System.out.println("0 - Exit the program");
 
             int choice = scanner.nextInt();
@@ -127,60 +125,46 @@ public class Main {
 
             switch (choice) {
                 case 1:
-                    inputItem(collection, scanner);
+                    collectionManager.printList();
                     break;
                 case 2:
-                    collection.printAll();
+                    System.out.print("Enter item title: ");
+                    String title = scanner.nextLine();
+                    System.out.print("Enter item year: ");
+                    int year = scanner.nextInt();
+                    System.out.print("Enter item rating: ");
+                    double rating = scanner.nextDouble();
+                    scanner.nextLine(); // Consume the newline character
+                    Item newItem = new Item(title, year, rating);
+                    collectionManager.add(newItem);
                     break;
                 case 3:
-                    System.out.print("Enter the index of the item to print: ");
-                    int indexToPrint = scanner.nextInt();
-                    scanner.nextLine(); // Consume the newline character
-                    collection.printOne(indexToPrint - 1); // Adjust index to 0-based
-                    break;
-                case 4:
                     System.out.print("Enter the index of the item to remove: ");
                     int indexToRemove = scanner.nextInt();
-                    scanner.nextLine(); // Consume the newline character
-                    collection.remove(indexToRemove - 1); // Adjust index to 0-based
+                    collectionManager.remove(indexToRemove);
+                    break;
+                case 4:
+                    collectionManager.sort();
                     break;
                 case 5:
-                    collection.sort();
-                    System.out.println("Items sorted by year.");
+                    System.out.print("Enter a search phrase: ");
+                    String searchPhrase = scanner.nextLine();
+                    collectionManager.search(searchPhrase);
                     break;
                 case 6:
-                    System.out.print("Enter the title to search: ");
-                    String titleSearch = scanner.nextLine();
-                    collection.search(titleSearch);
+                    System.out.print("Enter a year to search for: ");
+                    int searchYear = scanner.nextInt();
+                    collectionManager.searchByYear(searchYear);
                     break;
                 case 7:
-                    System.out.print("Enter the year to search: ");
-                    int yearSearch = scanner.nextInt();
-                    scanner.nextLine(); // Consume the newline character
-                    collection.searchByYear(yearSearch);
+                    collectionManager.printAll();
                     break;
                 case 0:
                     System.out.println("Exiting the program.");
-                    scanner.close();
                     System.exit(0);
-                    break;
                 default:
-                    System.out.println("Invalid option. Please try again.");
-                    break;
+                    System.out.println("Invalid choice. Please enter a valid option.");
             }
         }
-    }
-
-    public static void inputItem(Collection collection, Scanner scanner) {
-        System.out.print("Enter item title: ");
-        String title = scanner.nextLine();
-
-        System.out.print("Enter item year: ");
-        int year = scanner.nextInt();
-        scanner.nextLine(); // Consume the newline character
-
-        Item newItem = new Item(title, year);
-        collection.add(newItem);
-        System.out.println("Item added to the collection.");
     }
 }
